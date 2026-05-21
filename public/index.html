@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLUX API — AI Content Engine</title>
+<meta name="description" content="Blog posts, social media, emails, ads, product descriptions — generated via API. One brief in, publish-ready content out.">
+<meta property="og:title" content="FLUX API — AI Content Engine">
+<meta property="og:description" content="Generate any content via API. Blog posts, threads, email campaigns, ad copy, landing pages. Multi-LLM. Structured JSON.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#030303;--surface:rgba(255,255,255,.03);--surface2:rgba(255,255,255,.05);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f5f5f5;--muted:rgba(255,255,255,.4);--dim:rgba(255,255,255,.2);
+  --orange:#f97316;--pink:#f472b6;--violet:#a78bfa;--emerald:#34d399;--sky:#38bdf8;--amber:#fbbf24;
+}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.w{max-width:1120px;margin:0 auto;padding:0 28px}
+
+/* Mesh gradient bg */
+.mesh{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:hidden}
+.mesh-blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.07;animation:float 20s ease-in-out infinite}
+.mesh-blob:nth-child(1){width:700px;height:700px;background:var(--orange);top:-200px;left:-100px;animation-delay:0s}
+.mesh-blob:nth-child(2){width:600px;height:600px;background:var(--pink);bottom:-100px;right:-150px;animation-delay:-7s}
+.mesh-blob:nth-child(3){width:500px;height:500px;background:var(--violet);top:40%;left:40%;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-40px) scale(1.05)}66%{transform:translate(-20px,30px) scale(.95)}}
+
+.rel{position:relative;z-index:1}
+
+/* Nav */
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.logo{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.logo span{background:linear-gradient(135deg,var(--orange),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-r{display:flex;gap:24px;align-items:center}
+.nav-r a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+.nav-r a:hover{color:var(--text)}
+.nav-btn{background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;padding:8px 20px;border-radius:8px;font-weight:600;font-size:13px}
+
+/* Hero */
+.hero{padding:90px 0 60px;text-align:center}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);font-size:11px;color:var(--muted);margin-bottom:24px;background:var(--surface)}
+.chip .pulse{width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(38px,6.5vw,68px);font-weight:800;letter-spacing:-.045em;line-height:1.05;margin-bottom:18px}
+.gr-o{background:linear-gradient(135deg,var(--orange),var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-p{font-size:17px;color:var(--muted);max-width:540px;margin:0 auto 32px;font-weight:300;line-height:1.65}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;border:none;cursor:pointer;font-family:inherit;transition:all .25s}
+.btn-fire{background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;box-shadow:0 0 30px rgba(249,115,22,.25)}
+.btn-fire:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(249,115,22,.4)}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--orange)}
+
+/* Content types showcase */
+.types{padding:40px 0 80px}
+.type-grid{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.type-pill{padding:10px 20px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:13px;font-weight:500;color:var(--muted);transition:all .3s;cursor:default}
+.type-pill:hover{border-color:var(--orange);color:var(--text);background:rgba(249,115,22,.05)}
+.type-pill .ico{margin-right:6px}
+
+/* Demo */
+.demo{padding:0 0 80px}
+.demo-card{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:16px;overflow:hidden;backdrop-filter:blur(20px)}
+.demo-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+.demo-dot{width:10px;height:10px;border-radius:50%}
+.demo-dot.r{background:#ff5f57}.demo-dot.y{background:#febc2e}.demo-dot.g{background:#28c840}
+.demo-title{font-size:11px;color:var(--dim);margin-left:8px;font-family:'JetBrains Mono',monospace}
+.demo-body{padding:20px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;min-height:300px;max-height:420px;overflow-y:auto}
+.d-m{color:var(--dim)}.d-o{color:var(--orange)}.d-p{color:var(--pink)}.d-e{color:var(--emerald)}.d-v{color:var(--violet)}.d-s{color:var(--sky)}.d-a{color:var(--amber)}
+.caret{display:inline-block;width:8px;height:14px;background:var(--orange);animation:blink 1s infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Features */
+.features{padding:80px 0}
+.features h2{font-size:34px;font-weight:700;text-align:center;margin-bottom:48px;letter-spacing:-.03em}
+.f-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.f-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;transition:all .3s;position:relative;overflow:hidden}
+.f-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--orange),transparent);opacity:0;transition:opacity .3s}
+.f-card:hover{border-color:rgba(249,115,22,.25);transform:translateY(-2px)}.f-card:hover::after{opacity:1}
+.f-card h3{font-size:15px;font-weight:600;margin-bottom:6px}
+.f-card p{font-size:13px;color:var(--muted);line-height:1.65}
+.f-ico{font-size:24px;margin-bottom:12px}
+
+/* Endpoints */
+.endpoints{padding:80px 0}
+.endpoints h2{font-size:30px;font-weight:700;margin-bottom:32px;letter-spacing:-.03em}
+.ep{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:border-color .2s}
+.ep:hover{border-color:rgba(249,115,22,.25)}
+.ep-m{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:4px 8px;border-radius:5px;min-width:44px;text-align:center}
+.ep-m.post{background:rgba(52,211,153,.1);color:var(--emerald)}
+.ep-m.get{background:rgba(167,139,250,.1);color:var(--violet)}
+.ep-p{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;flex:1}
+.ep-d{font-size:12px;color:var(--muted)}
+.ep-t{font-size:9px;padding:3px 8px;border-radius:5px;font-weight:600;letter-spacing:.04em}
+.ep-t.hot{background:rgba(249,115,22,.1);color:var(--orange);border:1px solid rgba(249,115,22,.2)}
+.ep-t.new{background:rgba(244,114,182,.1);color:var(--pink);border:1px solid rgba(244,114,182,.2)}
+
+/* Pricing */
+.pricing{padding:80px 0}
+.pricing h2{font-size:34px;font-weight:700;text-align:center;margin-bottom:10px;letter-spacing:-.03em}
+.pricing .sub{text-align:center;color:var(--muted);margin-bottom:44px}
+.p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.p-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;position:relative}
+.p-card.feat{border-color:rgba(249,115,22,.35);box-shadow:0 0 50px rgba(249,115,22,.06)}
+.p-card .tier{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px}
+.p-card .price{font-size:38px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px}
+.p-card .price span{font-size:14px;font-weight:400;color:var(--muted)}
+.p-card .desc{font-size:13px;color:var(--muted);margin-bottom:20px}
+.p-card ul{list-style:none;margin-bottom:24px}
+.p-card li{font-size:12px;padding:6px 0;color:rgba(255,255,255,.55);padding-left:18px;position:relative}
+.p-card li::before{content:'';position:absolute;left:0;top:12px;width:5px;height:5px;border-radius:50%;background:var(--emerald)}
+.p-card .btn{width:100%;justify-content:center;text-align:center}
+.pop{position:absolute;top:-10px;right:20px;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;font-size:9px;font-weight:700;padding:4px 12px;border-radius:8px;letter-spacing:.06em}
+
+/* Try */
+.tryit{padding:80px 0}
+.tryit h2{font-size:30px;font-weight:700;margin-bottom:8px;letter-spacing:-.03em}
+.tryit .sub{color:var(--muted);margin-bottom:24px}
+.try-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px}
+.try-form{display:grid;gap:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;display:block}
+input,select,textarea{width:100%;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange)}
+textarea{min-height:80px;resize:vertical;font-family:'JetBrains Mono',monospace;font-size:11px}
+#tryResult{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:18px;display:none;max-height:500px;overflow-y:auto}
+#tryResult pre{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-all;color:rgba(255,255,255,.65)}
+
+footer{padding:40px 0;border-top:1px solid var(--border);text-align:center;margin-top:40px}
+footer p{font-size:12px;color:var(--dim)}
+
+@media(max-width:768px){.f-grid,.p-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.ep-d{display:none}}
+</style>
+</head>
+<body>
+
+<div class="mesh">
+  <div class="mesh-blob"></div>
+  <div class="mesh-blob"></div>
+  <div class="mesh-blob"></div>
+</div>
+
+<div class="rel">
+<div class="w">
+
+<nav>
+  <div class="logo"><span>FLUX</span> API</div>
+  <div class="nav-r">
+    <a href="#features">Features</a>
+    <a href="#endpoints">Docs</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#tryit" class="nav-btn">Try free</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="chip"><span class="pulse"></span> v1.0 — generating content</div>
+  <h1>One brief in.<br><span class="gr-o">Content empire out.</span></h1>
+  <p class="hero-p">Blog posts, social threads, email campaigns, ad copy, landing pages, product descriptions. One API call. Publish-ready JSON. Any LLM.</p>
+  <div class="hero-btns">
+    <a href="#tryit" class="btn btn-fire">Generate content</a>
+    <a href="#endpoints" class="btn btn-ghost">API reference</a>
+  </div>
+</div>
+
+<div class="types">
+  <div class="type-grid">
+    <div class="type-pill"><span class="ico">&#128221;</span> Blog Posts</div>
+    <div class="type-pill"><span class="ico">&#128242;</span> Social Media</div>
+    <div class="type-pill"><span class="ico">&#128231;</span> Email Campaigns</div>
+    <div class="type-pill"><span class="ico">&#128226;</span> Ad Copy</div>
+    <div class="type-pill"><span class="ico">&#128717;</span> Product Descriptions</div>
+    <div class="type-pill"><span class="ico">&#127919;</span> Landing Pages</div>
+    <div class="type-pill"><span class="ico">&#128293;</span> Twitter Threads</div>
+    <div class="type-pill"><span class="ico">&#128260;</span> Repurpose</div>
+    <div class="type-pill"><span class="ico">&#128200;</span> SEO Analysis</div>
+    <div class="type-pill"><span class="ico">&#127908;</span> Brand Voice</div>
+  </div>
+</div>
+
+<div class="demo">
+  <div class="demo-card">
+    <div class="demo-bar">
+      <div class="demo-dot r"></div><div class="demo-dot y"></div><div class="demo-dot g"></div>
+      <span class="demo-title">flux-api generate/thread</span>
+    </div>
+    <div class="demo-body" id="demoBody"></div>
+  </div>
+</div>
+
+<div class="features" id="features">
+  <h2>Built for content at scale</h2>
+  <div class="f-grid">
+    <div class="f-card"><div class="f-ico">&#128221;</div><h3>7 Content Types</h3><p>Blog posts, social posts, email sequences, ad copy, product descriptions, landing pages, Twitter threads. Each with specialized output schemas.</p></div>
+    <div class="f-card"><div class="f-ico">&#128260;</div><h3>Content Repurposing</h3><p>Turn one blog post into 5 social posts, an email, a thread, and a LinkedIn carousel. One API call. Full content calendar included.</p></div>
+    <div class="f-card"><div class="f-ico">&#127908;</div><h3>Brand Voice Cloning</h3><p>Feed it 3-5 content samples. It extracts your brand voice profile and generates a reusable system prompt. Every future generation sounds like you.</p></div>
+    <div class="f-card"><div class="f-ico">&#128200;</div><h3>SEO Built In</h3><p>Every blog post comes with meta descriptions, keywords, heading structure, internal link suggestions, and an SEO score. Keyword research endpoint included.</p></div>
+    <div class="f-card"><div class="f-ico">&#9889;</div><h3>Multi-LLM</h3><p>Anthropic Claude, OpenAI GPT, Google Gemini. Pick the best model for your content type. Automatic failover. Zero vendor lock-in.</p></div>
+    <div class="f-card"><div class="f-ico">&#128736;</div><h3>Content Improvement</h3><p>Paste existing content. Get it rewritten with before/after scores for readability, engagement, SEO, and clarity. Specific change log included.</p></div>
+  </div>
+</div>
+
+<div class="endpoints" id="endpoints">
+  <h2>API Reference</h2>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/generate/blog</span><span class="ep-d">SEO blog post with meta, keywords, CTA</span><span class="ep-t hot">HOT</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/generate/social</span><span class="ep-d">Platform-specific posts + threads + carousels</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/generate/email</span><span class="ep-d">Email sequences — welcome, launch, nurture</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/generate/ads</span><span class="ep-d">Ad copy with A/B variants per platform</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/generate/product</span><span class="ep-d">E-commerce descriptions + bullet points</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/generate/landing</span><span class="ep-d">Full landing page copy — hero to CTA</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/generate/thread</span><span class="ep-d">Viral Twitter/X threads with hooks</span><span class="ep-t hot">HOT</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/repurpose</span><span class="ep-d">One content piece into many formats</span><span class="ep-t new">NEW</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/improve</span><span class="ep-d">Rewrite with before/after scores</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/seo</span><span class="ep-d">Keyword research + content analysis</span></div>
+  <div class="ep"><span class="ep-m post">POST</span><span class="ep-p">/v1/brand-voice</span><span class="ep-d">Analyze samples, extract brand voice</span><span class="ep-t new">NEW</span></div>
+  <div class="ep"><span class="ep-m get">GET</span><span class="ep-p">/v1/types</span><span class="ep-d">List all content types + providers</span></div>
+</div>
+
+<div class="pricing" id="pricing">
+  <h2>Start free. Scale infinitely.</h2>
+  <p class="sub">Usage-based. No minimums. No contracts.</p>
+  <div class="p-grid">
+    <div class="p-card">
+      <div class="tier">Starter</div>
+      <div class="price">Free</div>
+      <div class="desc">Ship your first integration</div>
+      <ul>
+        <li>100 generations / month</li>
+        <li>All 7 content types</li>
+        <li>Fast quality tier</li>
+        <li>JSON output</li>
+        <li>Community support</li>
+      </ul>
+      <a href="#tryit" class="btn btn-ghost">Get API key</a>
+    </div>
+    <div class="p-card feat">
+      <div class="pop">POPULAR</div>
+      <div class="tier">Growth</div>
+      <div class="price">&pound;59 <span>/ month</span></div>
+      <div class="desc">For agencies and content teams</div>
+      <ul>
+        <li>5,000 generations / month</li>
+        <li>Best quality models</li>
+        <li>Brand voice profiles</li>
+        <li>Content repurposing</li>
+        <li>SEO analysis</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="#tryit" class="btn btn-fire">Start free trial</a>
+    </div>
+    <div class="p-card">
+      <div class="tier">Enterprise</div>
+      <div class="price">&pound;249 <span>/ month</span></div>
+      <div class="desc">Unlimited content at scale</div>
+      <ul>
+        <li>Unlimited generations</li>
+        <li>Custom output schemas</li>
+        <li>Bulk generation API</li>
+        <li>Custom LLM routing</li>
+        <li>Dedicated support + SLA</li>
+        <li>Self-hosted option</li>
+        <li>White-label ready</li>
+      </ul>
+      <a href="mailto:hello@flux-api.io" class="btn btn-ghost">Contact sales</a>
+    </div>
+  </div>
+</div>
+
+<div class="tryit" id="tryit">
+  <h2>Try it now</h2>
+  <p class="sub">Generate real content. No signup required for demo.</p>
+  <div class="try-box">
+    <div class="try-form">
+      <div class="form-row">
+        <div><label>API Key</label><input type="text" id="tryKey" placeholder="flux_f_..."></div>
+        <div><label>Content Type</label>
+          <select id="tryType">
+            <option value="blog">Blog Post</option>
+            <option value="social">Social Media</option>
+            <option value="email">Email Campaign</option>
+            <option value="ads">Ad Copy</option>
+            <option value="product">Product Description</option>
+            <option value="landing">Landing Page</option>
+            <option value="thread" selected>Twitter Thread</option>
+          </select>
+        </div>
+        <div><label>Tone</label>
+          <select id="tryTone">
+            <option value="">Auto-detect</option>
+            <option value="professional">Professional</option>
+            <option value="casual">Casual</option>
+            <option value="witty">Witty</option>
+            <option value="authoritative">Authoritative</option>
+            <option value="friendly">Friendly</option>
+          </select>
+        </div>
+      </div>
+      <div><label>Brief</label><textarea id="tryBrief" placeholder="Write a Twitter thread about why most startups fail at content marketing and what they should do instead. Target audience: SaaS founders. Include actionable tips."></textarea></div>
+      <button class="btn btn-fire" onclick="tryGen()" id="tryBtn" style="justify-content:center">Generate</button>
+    </div>
+    <div id="tryResult"><pre id="tryPre"></pre></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<footer><p>FLUX API — Content at the speed of thought. &copy; 2026</p></footer>
+
+<script>
+const demoBody=document.getElementById('demoBody');
+const lines=[
+{t:'$ curl -X POST https://flux-api.io/v1/generate/thread \\',c:'d-m'},
+{t:'    -H "Authorization: Bearer flux_p_abc..." \\',c:'d-m'},
+{t:'    -d \'{"brief": "Why 90% of landing pages fail"}\'',c:'d-m'},
+{t:'',c:''},
+{t:'[generating] Analyzing brief... topic: conversion optimization',c:'d-o'},
+{t:'[generating] Crafting hook tweet (scroll-stopper)...',c:'d-p'},
+{t:'[generating] Building thread narrative (8 tweets)...',c:'d-v'},
+{t:'[complete] Thread ready in 3.2s',c:'d-e'},
+{t:'',c:''},
+{t:'{"hook": "90% of landing pages fail for the same reason:",c:'d-o'},
+{t:' "tweets": [',c:'d-m'},
+{t:'   "They talk about features instead of outcomes.",',c:'d-e'},
+{t:'   "I\'ve reviewed 500+ landing pages this year. Pattern:",',c:'d-e'},
+{t:'   "BAD: \\"Our AI-powered platform integrates...\\"",',c:'d-p'},
+{t:'   "GOOD: \\"Close 3x more deals without hiring.\\"",',c:'d-e'},
+{t:'   "The fix is embarrassingly simple:",',c:'d-a'},
+{t:'   "1. Lead with the outcome they want",',c:'d-s'},
+{t:'   "2. Show proof it works (numbers > words)",',c:'d-s'},
+{t:'   "3. Remove every word that doesn\'t convert",',c:'d-s'},
+{t:'   "4. One CTA. One action. One page."',c:'d-s'},
+{t:' ],',c:'d-m'},
+{t:' "estimated_engagement": "viral",',c:'d-a'},
+{t:' "hook_type": "bold_claim"}',c:'d-m'},
+];
+let li=0;
+function addLine(){
+  if(li>=lines.length){li=0;demoBody.innerHTML='';}
+  const l=lines[li];const el=document.createElement('div');el.className=l.c;el.textContent=l.t||' ';
+  const old=demoBody.querySelector('.caret');if(old)old.remove();
+  demoBody.appendChild(el);
+  if(li<lines.length-1){const c=document.createElement('span');c.className='caret';demoBody.appendChild(c);}
+  demoBody.scrollTop=demoBody.scrollHeight;li++;
+  setTimeout(addLine,li<=4?500:li<=8?700:400);
+}
+setTimeout(addLine,1200);
+
+async function tryGen(){
+  const btn=document.getElementById('tryBtn'),rd=document.getElementById('tryResult'),pre=document.getElementById('tryPre');
+  const key=document.getElementById('tryKey').value.trim();
+  const type=document.getElementById('tryType').value;
+  const tone=document.getElementById('tryTone').value;
+  const brief=document.getElementById('tryBrief').value.trim();
+  if(!key){alert('Enter API key');return;}
+  if(!brief){alert('Enter a brief');return;}
+  btn.textContent='Generating...';btn.disabled=true;
+  rd.style.display='block';pre.textContent='Generating '+type+'...\n';
+  try{
+    const r=await fetch('/v1/generate/'+type,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({brief,tone:tone||undefined}),
+    });
+    pre.textContent=JSON.stringify(await r.json(),null,2);
+  }catch(e){pre.textContent='Error: '+e.message;}
+  btn.textContent='Generate';btn.disabled=false;
+}
+</script>
+</body>
+</html>
