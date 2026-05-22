@@ -1,0 +1,681 @@
+openapi: 3.0.3
+info:
+  title: Flux — Content Generation API
+  version: 1.0.0
+  description: >
+    Content Generation API — blog posts, social media, emails, ads, landing pages.
+    Any format. Any LLM. Structured JSON output.
+
+
+    Flux generates production-ready content across 7 content types and 4 utility
+    endpoints. Bring your own LLM provider or use the built-in default. Every
+    response returns structured JSON with the generated content, metadata, and
+    SEO suggestions where applicable.
+  contact:
+    name: Flux API Support
+    email: support@fluxapi.dev
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://flux-api.p.rapidapi.com
+    description: RapidAPI Production
+
+paths:
+  /v1/generate/{type}:
+    post:
+      operationId: generateContent
+      summary: Generate content by type
+      description: >
+        Generate content for one of 7 supported types: blog, social, email, ads,
+        product, landing, or thread. Returns structured JSON with the generated
+        content and metadata.
+      tags:
+        - Content Generation
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: The content type to generate
+          schema:
+            type: string
+            enum:
+              - blog
+              - social
+              - email
+              - ads
+              - product
+              - landing
+              - thread
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+            examples:
+              blogPost:
+                summary: Generate a blog post
+                value:
+                  brief: "Write about the benefits of remote work for startups"
+                  tone: "professional"
+                  audience: "startup founders"
+                  keywords:
+                    - remote work
+                    - startup culture
+                    - distributed teams
+                  length: "long"
+                  variants: 1
+              socialPost:
+                summary: Generate a social media post
+                value:
+                  brief: "Announce our new AI feature launch"
+                  tone: "excited"
+                  audience: "tech professionals"
+                  length: "short"
+                  variants: 3
+      responses:
+        '200':
+          description: Content generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /v1/repurpose:
+    post:
+      operationId: repurposeContent
+      summary: Repurpose content across formats
+      description: >
+        Take existing content and transform it into one or more different formats.
+        For example, turn a blog post into social media posts, an email, and ad copy.
+      tags:
+        - Utilities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepurposeRequest'
+            examples:
+              blogToSocial:
+                summary: Repurpose a blog post into social media
+                value:
+                  content: "Our latest blog post about AI trends in 2026..."
+                  source_type: "blog"
+                  target_types:
+                    - social
+                    - email
+                    - thread
+                  tone: "casual"
+                  audience: "developers"
+      responses:
+        '200':
+          description: Content repurposed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepurposeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /v1/improve:
+    post:
+      operationId: improveContent
+      summary: Improve existing content
+      description: >
+        Enhance existing content for clarity, engagement, SEO, conversion, or
+        tone. Returns the improved version with a summary of changes made.
+      tags:
+        - Utilities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImproveRequest'
+            examples:
+              improveForSeo:
+                summary: Improve content for SEO
+                value:
+                  content: "We sell great software. Buy our product today."
+                  goals:
+                    - seo
+                    - engagement
+                  tone: "professional"
+      responses:
+        '200':
+          description: Content improved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImproveResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /v1/seo:
+    post:
+      operationId: seoAnalysis
+      summary: SEO analysis and suggestions
+      description: >
+        Analyze a topic, URL, or content block for SEO. Returns keyword
+        suggestions, meta descriptions, title variants, and content
+        structure recommendations.
+      tags:
+        - Utilities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeoRequest'
+            examples:
+              topicAnalysis:
+                summary: Analyze a topic for SEO
+                value:
+                  topic: "best project management tools for remote teams"
+      responses:
+        '200':
+          description: SEO analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /v1/brand-voice:
+    post:
+      operationId: analyzeBrandVoice
+      summary: Analyze and extract brand voice
+      description: >
+        Provide writing samples and a brand name. Flux analyzes the samples to
+        extract a reusable brand voice profile including tone, vocabulary,
+        sentence structure, and personality traits.
+      tags:
+        - Utilities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandVoiceRequest'
+            examples:
+              extractVoice:
+                summary: Extract brand voice from samples
+                value:
+                  samples:
+                    - "We build tools that get out of your way. No fluff. No bloat."
+                    - "Ship faster. Break fewer things. Sleep better at night."
+                  brand_name: "Acme Tools"
+      responses:
+        '200':
+          description: Brand voice profile generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandVoiceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /v1/types:
+    get:
+      operationId: listTypes
+      summary: List available generators and utilities
+      description: >
+        Returns all available content generation types and utility endpoints
+        with their descriptions and supported parameters.
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: Types listed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TypesResponse'
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      description: Returns API health status, version, and uptime.
+      tags:
+        - Meta
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  version:
+                    type: string
+                    example: 1.0.0
+                  uptime:
+                    type: number
+                    example: 86400
+
+components:
+  schemas:
+    GenerateRequest:
+      type: object
+      required:
+        - brief
+      properties:
+        brief:
+          type: string
+          description: What to write about — the core prompt or creative brief
+          example: "Write about the benefits of remote work for startups"
+        tone:
+          type: string
+          description: Writing tone
+          enum:
+            - professional
+            - casual
+            - excited
+            - formal
+            - witty
+            - empathetic
+            - authoritative
+            - conversational
+          default: professional
+        audience:
+          type: string
+          description: Target audience for the content
+          example: "startup founders"
+        brand_voice:
+          type: string
+          description: Brand voice profile ID (from /v1/brand-voice) or inline description
+        keywords:
+          type: array
+          items:
+            type: string
+          description: SEO keywords to weave into the content
+        length:
+          type: string
+          description: Desired content length
+          enum:
+            - short
+            - medium
+            - long
+          default: medium
+        variants:
+          type: integer
+          description: Number of content variants to generate (1-5)
+          minimum: 1
+          maximum: 5
+          default: 1
+        provider:
+          type: string
+          description: LLM provider to use
+          enum:
+            - auto
+            - openai
+            - anthropic
+            - google
+          default: auto
+        quality:
+          type: string
+          description: Quality tier — higher quality uses more capable models
+          enum:
+            - fast
+            - balanced
+            - premium
+          default: balanced
+
+    GenerateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        type:
+          type: string
+          example: blog
+        variants:
+          type: array
+          items:
+            type: object
+            properties:
+              content:
+                type: string
+                description: The generated content
+              title:
+                type: string
+                description: Generated title (for blog, email, landing)
+              meta_description:
+                type: string
+                description: SEO meta description (for blog, landing)
+              word_count:
+                type: integer
+              reading_time:
+                type: string
+                example: "4 min read"
+        metadata:
+          type: object
+          properties:
+            provider:
+              type: string
+            model:
+              type: string
+            tone:
+              type: string
+            audience:
+              type: string
+            generated_at:
+              type: string
+              format: date-time
+
+    RepurposeRequest:
+      type: object
+      required:
+        - content
+        - source_type
+        - target_types
+      properties:
+        content:
+          type: string
+          description: The source content to repurpose
+        source_type:
+          type: string
+          description: What the source content is
+          enum:
+            - blog
+            - social
+            - email
+            - ads
+            - product
+            - landing
+            - thread
+        target_types:
+          type: array
+          items:
+            type: string
+            enum:
+              - blog
+              - social
+              - email
+              - ads
+              - product
+              - landing
+              - thread
+          description: Formats to repurpose into
+        tone:
+          type: string
+        audience:
+          type: string
+        provider:
+          type: string
+          enum:
+            - auto
+            - openai
+            - anthropic
+            - google
+          default: auto
+
+    RepurposeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        source_type:
+          type: string
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              target_type:
+                type: string
+              content:
+                type: string
+              title:
+                type: string
+              word_count:
+                type: integer
+
+    ImproveRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: The content to improve
+        goals:
+          type: array
+          items:
+            type: string
+            enum:
+              - clarity
+              - engagement
+              - seo
+              - conversion
+              - tone
+              - grammar
+          description: What to optimize for
+        tone:
+          type: string
+        provider:
+          type: string
+          enum:
+            - auto
+            - openai
+            - anthropic
+            - google
+          default: auto
+
+    ImproveResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        original_word_count:
+          type: integer
+        improved_word_count:
+          type: integer
+        content:
+          type: string
+        changes_summary:
+          type: array
+          items:
+            type: string
+          description: List of changes made
+
+    SeoRequest:
+      type: object
+      properties:
+        topic:
+          type: string
+          description: Topic to analyze for SEO
+        url:
+          type: string
+          description: URL to analyze for SEO
+        content:
+          type: string
+          description: Content block to analyze for SEO
+        provider:
+          type: string
+          enum:
+            - auto
+            - openai
+            - anthropic
+            - google
+          default: auto
+
+    SeoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        keywords:
+          type: array
+          items:
+            type: object
+            properties:
+              keyword:
+                type: string
+              difficulty:
+                type: string
+              relevance:
+                type: string
+        meta_descriptions:
+          type: array
+          items:
+            type: string
+        title_variants:
+          type: array
+          items:
+            type: string
+        content_suggestions:
+          type: array
+          items:
+            type: string
+
+    BrandVoiceRequest:
+      type: object
+      required:
+        - samples
+        - brand_name
+      properties:
+        samples:
+          type: array
+          items:
+            type: string
+          description: Writing samples that represent the brand voice (2-10 samples recommended)
+          minItems: 1
+        brand_name:
+          type: string
+          description: Name of the brand
+        provider:
+          type: string
+          enum:
+            - auto
+            - openai
+            - anthropic
+            - google
+          default: auto
+
+    BrandVoiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        brand_name:
+          type: string
+        voice_profile:
+          type: object
+          properties:
+            tone:
+              type: array
+              items:
+                type: string
+            personality:
+              type: array
+              items:
+                type: string
+            vocabulary_level:
+              type: string
+            sentence_style:
+              type: string
+            do:
+              type: array
+              items:
+                type: string
+            avoid:
+              type: array
+              items:
+                type: string
+        profile_id:
+          type: string
+          description: Reusable profile ID for the brand_voice parameter
+
+    TypesResponse:
+      type: object
+      properties:
+        generators:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+        utilities:
+          type: array
+          items:
+            type: object
+            properties:
+              endpoint:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              limit:
+                type: integer
+              used:
+                type: integer
+              tier:
+                type: string
+              upgrade:
+                type: string
+
+  securitySchemes:
+    RapidAPI:
+      type: apiKey
+      in: header
+      name: X-RapidAPI-Key
+
+security:
+  - RapidAPI: []
+
+tags:
+  - name: Content Generation
+    description: Generate content across 7 types — blog, social, email, ads, product, landing, thread
+  - name: Utilities
+    description: Repurpose, improve, SEO analysis, and brand voice extraction
+  - name: Meta
+    description: API metadata and health
