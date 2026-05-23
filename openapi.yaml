@@ -22,6 +22,29 @@ servers:
     description: RapidAPI Production
 
 paths:
+  /health:
+    get:
+      operationId: health
+      summary: Service health check
+      description: Returns service status, version, and which LLM providers are configured.
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  version: { type: string, example: "1.0.0" }
+                  providers:
+                    type: array
+                    items: { type: string }
+                    example: [anthropic, openai, google]
+
   /v1/generate/{type}:
     post:
       operationId: generateContent
