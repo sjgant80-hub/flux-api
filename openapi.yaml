@@ -18,8 +18,10 @@ info:
     name: Proprietary
 
 servers:
+  - url: https://flux-api-production-54c1.up.railway.app
+    description: Production (Railway · direct)
   - url: https://flux-api.p.rapidapi.com
-    description: RapidAPI Production
+    description: RapidAPI Marketplace (after listing)
 
 paths:
   /health:
