@@ -18,8 +18,8 @@ info:
     name: Proprietary
 
 servers:
-  - url: https://flux-api-production-54c1.up.railway.app
-    description: Production (Railway · direct)
+  - url: https://flux-api-da50.onrender.com
+    description: Production (Render · direct)
   - url: https://flux-api.p.rapidapi.com
     description: RapidAPI Marketplace (after listing)
 

@@ -394,7 +394,7 @@ async function tryGen(){
   btn.textContent='Generating...';btn.disabled=true;
   rd.style.display='block';pre.textContent='Generating '+type+'...\n';
   try{
-    const apiBase = (window.FLUX_API_BASE) || 'https://flux-api-production-54c1.up.railway.app';
+    const apiBase = (window.FLUX_API_BASE) || 'https://flux-api-da50.onrender.com';
     const r=await fetch(apiBase + '/v1/generate/'+type,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
