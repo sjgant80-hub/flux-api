@@ -20,14 +20,12 @@ paths:
           description: Service is healthy
           content:
             application/json:
+              example:
+                status: ok
+                version: "1.0.0"
+                providers: [anthropic]
               schema:
                 type: object
-                properties:
-                  status:    { type: string, example: ok }
-                  version:   { type: string, example: "1.0.0" }
-                  providers:
-                    type: array
-                    items: { type: string }
 
   /v1/types:
     get:
@@ -39,13 +37,17 @@ paths:
           description: List of generators
           content:
             application/json:
+              example:
+                generators:
+                  - { type: "blog",    endpoint: "/v1/generate/blog",    description: "SEO-optimized blog posts" }
+                  - { type: "social",  endpoint: "/v1/generate/social",  description: "Platform-ready social posts" }
+                  - { type: "email",   endpoint: "/v1/generate/email",   description: "Email campaigns with subject lines" }
+                  - { type: "ads",     endpoint: "/v1/generate/ads",     description: "Ad copy variants" }
+                  - { type: "product", endpoint: "/v1/generate/product", description: "Conversion-optimized product copy" }
+                  - { type: "landing", endpoint: "/v1/generate/landing", description: "Landing page copy" }
+                  - { type: "thread",  endpoint: "/v1/generate/thread",  description: "Twitter/X multi-post threads" }
               schema:
                 type: object
-                properties:
-                  generators:
-                    type: array
-                    items:
-                      type: object
 
   /v1/generate/{type}:
     post:
@@ -63,22 +65,38 @@ paths:
         required: true
         content:
           application/json:
+            example:
+              brief: "Write about the benefits of remote work for startups"
+              tone: "professional"
+              audience: "early-stage founders"
+              keywords: ["remote work", "startups", "productivity"]
+              variants: 1
             schema:
               type: object
               required: [brief]
               properties:
-                brief:    { type: string, example: "Write about the benefits of remote work for startups" }
-                tone:     { type: string, example: "professional" }
-                audience: { type: string, example: "early-stage founders" }
+                brief:    { type: string }
+                tone:     { type: string }
+                audience: { type: string }
                 keywords:
                   type: array
                   items: { type: string }
-                variants: { type: integer, example: 1 }
+                variants: { type: integer }
       responses:
         '200':
           description: Generated content with metadata
           content:
             application/json:
+              example:
+                type: "blog"
+                content: "Generated blog post text..."
+                meta:
+                  word_count: 850
+                  reading_time_min: 4
+                  keywords_used: ["remote work", "startups"]
+                seo:
+                  meta_description: "..."
+                  suggested_h1: "..."
               schema:
                 type: object
 
@@ -91,20 +109,29 @@ paths:
         required: true
         content:
           application/json:
+            example:
+              content: "Long-form blog content here..."
+              from: "blog"
+              to: ["social", "thread"]
             schema:
               type: object
               required: [content, from, to]
               properties:
                 content: { type: string }
-                from:    { type: string, example: "blog" }
+                from:    { type: string }
                 to:
                   type: array
-                  items: { type: string, example: "social" }
+                  items: { type: string }
       responses:
         '200':
           description: Repurposed content
           content:
             application/json:
+              example:
+                source_format: "blog"
+                outputs:
+                  social: "..."
+                  thread: ["...", "...", "..."]
               schema:
                 type: object
 
@@ -117,18 +144,26 @@ paths:
         required: true
         content:
           application/json:
+            example:
+              text: "Original text to improve"
+              tone: "professional"
+              goal: "clarity"
             schema:
               type: object
               required: [text]
               properties:
                 text: { type: string }
-                tone: { type: string, example: "professional" }
-                goal: { type: string, example: "clarity" }
+                tone: { type: string }
+                goal: { type: string }
       responses:
         '200':
           description: Improved content
           content:
             application/json:
+              example:
+                original: "..."
+                improved: "..."
+                changes: ["tightened opening", "added concrete examples"]
               schema:
                 type: object
 
@@ -141,17 +176,26 @@ paths:
         required: true
         content:
           application/json:
+            example:
+              topic: "remote work software"
+              audience: "small business owners"
             schema:
               type: object
               required: [topic]
               properties:
-                topic:    { type: string, example: "remote work software" }
+                topic:    { type: string }
                 audience: { type: string }
       responses:
         '200':
           description: SEO data
           content:
             application/json:
+              example:
+                keywords:
+                  primary: ["remote work software"]
+                  secondary: ["remote tools", "team collaboration"]
+                title_variants: ["...", "...", "..."]
+                meta_description: "..."
               schema:
                 type: object
 
@@ -164,6 +208,10 @@ paths:
         required: true
         content:
           application/json:
+            example:
+              samples:
+                - "First piece of brand copy"
+                - "Second piece showing tone"
             schema:
               type: object
               required: [samples]
@@ -171,11 +219,16 @@ paths:
                 samples:
                   type: array
                   items: { type: string }
-                  example: ["Sample copy 1", "Sample copy 2"]
       responses:
         '200':
           description: Voice profile
           content:
             application/json:
+              example:
+                voice_profile:
+                  tone: "direct, peer-to-peer, no jargon"
+                  pacing: "short sentences, occasional fragment for emphasis"
+                  forbidden_phrases: ["delve into", "leverage"]
+                  signature_moves: ["one specific observation", "one specific question"]
               schema:
                 type: object
