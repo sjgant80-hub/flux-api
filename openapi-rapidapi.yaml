@@ -1,0 +1,181 @@
+openapi: 3.0.3
+info:
+  title: Flux
+  version: 1.0.0
+  description: |
+    Flux turns a one-line brief into production-ready content across 7 formats — blog, social, email, ads, product, landing, thread. Provider-agnostic (Anthropic, OpenAI, Google). Every response ships structured JSON with content, metadata, and SEO suggestions where applicable.
+
+servers:
+  - url: https://flux-api-da50.onrender.com
+
+paths:
+
+  /health:
+    get:
+      operationId: health
+      summary: Service health
+      description: Returns status, version, and configured LLM providers.
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:    { type: string, example: ok }
+                  version:   { type: string, example: "1.0.0" }
+                  providers:
+                    type: array
+                    items: { type: string }
+
+  /v1/types:
+    get:
+      operationId: listTypes
+      summary: List all content types
+      description: Returns the 7 supported content generators with their endpoints and descriptions.
+      responses:
+        '200':
+          description: List of generators
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generators:
+                    type: array
+                    items:
+                      type: object
+
+  /v1/generate/{type}:
+    post:
+      operationId: generateContent
+      summary: Generate content by type
+      description: Generate one of 7 content types — blog, social, email, ads, product, landing, thread.
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [blog, social, email, ads, product, landing, thread]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [brief]
+              properties:
+                brief:    { type: string, example: "Write about the benefits of remote work for startups" }
+                tone:     { type: string, example: "professional" }
+                audience: { type: string, example: "early-stage founders" }
+                keywords:
+                  type: array
+                  items: { type: string }
+                variants: { type: integer, example: 1 }
+      responses:
+        '200':
+          description: Generated content with metadata
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /v1/repurpose:
+    post:
+      operationId: repurpose
+      summary: Repurpose one piece of content into multiple formats
+      description: Take a piece of content in one format and convert it into others (blog → social + email + thread).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content, from, to]
+              properties:
+                content: { type: string }
+                from:    { type: string, example: "blog" }
+                to:
+                  type: array
+                  items: { type: string, example: "social" }
+      responses:
+        '200':
+          description: Repurposed content
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /v1/improve:
+    post:
+      operationId: improve
+      summary: Enhance existing content
+      description: Improve clarity, SEO, engagement, or conversion of existing content.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+                tone: { type: string, example: "professional" }
+                goal: { type: string, example: "clarity" }
+      responses:
+        '200':
+          description: Improved content
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /v1/seo:
+    post:
+      operationId: seo
+      summary: SEO research and meta generation
+      description: Generate keywords, meta descriptions, title variants, and content structure for a topic.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic]
+              properties:
+                topic:    { type: string, example: "remote work software" }
+                audience: { type: string }
+      responses:
+        '200':
+          description: SEO data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /v1/brand-voice:
+    post:
+      operationId: brandVoice
+      summary: Extract a brand voice profile from samples
+      description: Provide writing samples and get a reusable voice profile for consistent output across content types.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [samples]
+              properties:
+                samples:
+                  type: array
+                  items: { type: string }
+                  example: ["Sample copy 1", "Sample copy 2"]
+      responses:
+        '200':
+          description: Voice profile
+          content:
+            application/json:
+              schema:
+                type: object
