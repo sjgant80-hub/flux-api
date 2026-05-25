@@ -274,7 +274,7 @@ app.use(express.static('public'));
 function auth(req, res, next) {
   // RapidAPI proxy path — when deployed behind RapidAPI's marketplace
   const proxySecret = process.env.RAPIDAPI_PROXY_SECRET;
-  if (proxySecret && req.headers['x-rapidapi-proxy-secret'] === proxySecret) {
+  if (proxySecret && req.headers['x-proxy-secret'] === proxySecret) {
     req.tier = 'rapidapi';
     req.rapidUser = req.headers['x-rapidapi-user'] || null;
     req.rapidSubscription = req.headers['x-rapidapi-subscription'] || null;
